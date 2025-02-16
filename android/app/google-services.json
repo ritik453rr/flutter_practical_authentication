@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "29922417214",
+    "project_id": "authentication-practical-8d2f4",
+    "storage_bucket": "authentication-practical-8d2f4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29922417214:android:597b0abdc8a4e750b1cf6f",
+        "android_client_info": {
+          "package_name": "com.app.authentication_ptcl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB85q4WKIOoyrraW-cmJV8ywLlGTp8e6WI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
