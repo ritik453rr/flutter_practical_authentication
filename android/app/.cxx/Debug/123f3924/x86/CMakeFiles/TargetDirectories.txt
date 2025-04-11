@@ -1,0 +1,2 @@
+C:/Users/dell/Desktop/ptcl_flutter/authentication_ptcl/android/app/.cxx/Debug/123f3924/x86/CMakeFiles/edit_cache.dir
+C:/Users/dell/Desktop/ptcl_flutter/authentication_ptcl/android/app/.cxx/Debug/123f3924/x86/CMakeFiles/rebuild_cache.dir

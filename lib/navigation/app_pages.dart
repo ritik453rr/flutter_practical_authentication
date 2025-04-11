@@ -1,4 +1,6 @@
 import 'package:authentication_ptcl/navigation/app_routes.dart';
+import 'package:authentication_ptcl/views/home/home_binding.dart';
+import 'package:authentication_ptcl/views/home/home_view.dart';
 import 'package:authentication_ptcl/views/login/login_binding.dart';
 import 'package:authentication_ptcl/views/login/login_view.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,11 @@ class AppPages {
       name: AppRoutes.login,
       page: () => LoginView(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.home,
+      page: () => HomeView(),
+      binding: HomeBinding(),
     ),
   ];
 }
