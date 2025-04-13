@@ -1,6 +1,8 @@
 import 'package:authentication_ptcl/comman/app_srorage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// Firebase Services class to handle authentication and user state
@@ -34,6 +36,13 @@ class FirebaseServices {
       AppSrorage.setvalue(AppSrorage.isLogin, true);
       debugPrint("Signed in as ${user?.displayName ?? ""}");
     } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Sign in failed",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       debugPrint("Error signing in with Google: $e");
     }
   }

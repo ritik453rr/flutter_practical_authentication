@@ -16,14 +16,6 @@ class LoginView extends GetView<LoginController> {
             await FirebaseServices.signInWithGoogle();
             if (AppSrorage.getvalue(AppSrorage.isLogin) ?? false) {
               Get.offNamed(AppRoutes.home);
-            } else {
-              Get.snackbar(
-                "Error",
-                "Sign in failed",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red,
-                colorText: Colors.white,
-              );
             }
           },
           child: const Text(
