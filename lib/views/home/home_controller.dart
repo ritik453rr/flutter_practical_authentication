@@ -1,20 +1,17 @@
 import 'package:authentication_ptcl/bottomsheet/add_bottomsheet.dart';
+import 'package:authentication_ptcl/dialog/adaptive_dialog.dart';
 import 'package:authentication_ptcl/navigation/app_routes.dart';
 import 'package:authentication_ptcl/services/firebase_services.dart';
 import 'package:authentication_ptcl/views/home/model/note_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   final titleController = TextEditingController();
   final subtitleController = TextEditingController();
   var scrollController = ScrollController();
-  final updateTitle = TextEditingController();
-  final updateSubtitle = TextEditingController();
 
-  var isPageLoading = false.obs;
   var isLoading = true.obs;
   var isFetchingMore = false.obs;
   DocumentSnapshot? lastDocument;
@@ -26,7 +23,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchUsers();
+    fetchUsersWithPagination();
     addListenersToScrollController();
   }
 
@@ -34,18 +31,14 @@ class HomeController extends GetxController {
   void onClose() {
     titleController.dispose();
     subtitleController.dispose();
-    updateTitle.dispose();
-    updateSubtitle.dispose();
     super.onClose();
   }
 
   /// Fetch users from Firestore with pagination
-  Future<void> fetchUsers({bool isNextPage = false}) async {
+  Future<void> fetchUsersWithPagination({bool isNextPage = false}) async {
     try {
       if (isNextPage) {
-        isFetchingMore.value = true; 
-      } else {
-        isLoading.value = true; 
+        isFetchingMore.value = true;
       }
       Query query = fireStore
           .collection('notes')
@@ -60,7 +53,6 @@ class HomeController extends GetxController {
 
       if (querySnapshot.docs.isNotEmpty) {
         lastDocument = querySnapshot.docs.last;
-
         final newUsers = querySnapshot.docs
             .map(
               (doc) => NoteModel.fromJson(
@@ -89,12 +81,139 @@ class HomeController extends GetxController {
       if (scrollController.position.pixels ==
               scrollController.position.maxScrollExtent &&
           !isFetchingMore.value) {
-        fetchUsers(isNextPage: true);
+        fetchUsersWithPagination(isNextPage: true);
       }
-    }); // Fetch initial data
+    });
   }
 
-  /// Fetch notes from Firestore (with real-time updates)
+  /// Show the bottom sheet for adding a new note
+  void addNote() {
+    AddNoteBottomsheet()
+        .showSheet(
+            onTapButton: () async {
+              try {
+                if (titleController.text.isEmpty) {
+                  Get.snackbar(
+                    "Error",
+                    "Title cannot be empty",
+                    margin: const EdgeInsets.all(10),
+                  );
+                  return;
+                }
+                Get.back(); // Close the bottom sheet
+                final newNote = NoteModel(
+                  id: DateTime.now().toString(), // Generate a unique ID
+                  title: titleController.text,
+                  subtitle: subtitleController.text,
+                  createdAt: DateTime.now().toString(),
+                );
+
+                // Add the new note to Firestore
+                await FirebaseFirestore.instance
+                    .collection('notes')
+                    .doc(newNote.id)
+                    .set(newNote.toJson());
+                // Add the new note to the local list at the beginning
+                notes.insert(0, newNote);
+              } catch (e) {
+                Get.snackbar("Error", "Failed to add note");
+                debugPrint("Error adding note: $e");
+              }
+            },
+            titleController: titleController,
+            subtitleController: subtitleController)
+        .whenComplete(() {
+      titleController.clear();
+      subtitleController.clear();
+    });
+  }
+
+  /// Delete a note from Firestore on id base
+  void deleteNote({required String noteId}) async {
+    AdaptiveDialog.showDialog(
+      title: "Delete Note",
+      content: "Are you sure to delete note?",
+      onPressedYes: () async {
+        try {
+          Get.back(); // Close the dialog
+          await FirebaseFirestore.instance
+              .collection('notes')
+              .doc(noteId)
+              .delete();
+          // Remove the note from the local list
+          notes.removeWhere((note) => note.id == noteId);
+        } catch (e) {
+          Get.back();
+          Get.snackbar("Error", "Failed to delete note");
+          debugPrint("Error deleting note: $e");
+        }
+      },
+    );
+  }
+
+  /// Show a bottom sheet to update an existing note
+  void updateNote({required NoteModel note}) {
+    titleController.text = note.title;
+    subtitleController.text = note.subtitle;
+    // show
+    AddNoteBottomsheet()
+        .showSheet(
+            titleController: titleController,
+            subtitleController: subtitleController,
+            isUpdation: true,
+            onTapButton: () async {
+              try {
+                // Validate that the title is not empty
+                if (titleController.text.isEmpty) {
+                  Get.snackbar("Error", "Title cannot be empty");
+                  return;
+                }
+                Get.back();
+                // Create an updated note object
+                final updatedNote = NoteModel(
+                  id: note.id,
+                  title: titleController.text,
+                  subtitle: subtitleController.text,
+                  createdAt: DateTime.now().toString(),
+                );
+
+                // Update the note in Firestore
+                await FirebaseFirestore.instance
+                    .collection('notes')
+                    .doc(note.id)
+                    .update(updatedNote.toJson());
+
+                // Update the local list of notes
+                final index = notes.indexWhere((item) => item.id == note.id);
+                if (index != -1) {
+                  notes[0] = updatedNote;
+                }
+              } catch (e) {
+                // Handle errors and show a snackbar
+                Get.snackbar("Error", "Failed to update note");
+                debugPrint("Error updating note: $e");
+              }
+            })
+        .whenComplete(() {
+      titleController.clear();
+      subtitleController.clear();
+    });
+  }
+
+  /// Logout the user from the app
+  void logout() {
+    AdaptiveDialog.showDialog(
+      title: "Logout",
+      content: "Are you sure you want to logout?",
+      onPressedYes: () async {
+        Get.back(); // Close the dialog
+        await FirebaseServices.signOut();
+        Get.offNamed(AppRoutes.login);
+      },
+    );
+  }
+
+  //Fetch All notes at once from Firestore (with real-time updates)
   // void fetchAllNotes() {
   //   FirebaseFirestore.instance
   //       .collection('notes')
@@ -113,109 +232,4 @@ class HomeController extends GetxController {
   //     },
   //   );
   // }
-
-  /// Add a new noto to firestore set the note id to the document id
-  Future<void> onTapAddNote() async {
-    try {
-      if (titleController.text.isEmpty) {
-        Get.snackbar(
-          "Error",
-          "Title cannot be empty",
-          margin: const EdgeInsets.all(10),
-        );
-        return;
-      }
-      Get.back(); // Close the bottom sheet
-      final newNote = NoteModel(
-        id: DateTime.now().toString(), // Generate a unique ID
-        title: titleController.text,
-        subtitle: subtitleController.text,
-        createdAt: DateTime.now().toString(),
-      );
-
-      await FirebaseFirestore.instance
-          .collection('notes')
-          .doc(newNote.id)
-          .set(newNote.toJson());
-
-      titleController.clear();
-      subtitleController.clear();
-    } catch (e) {
-      Get.snackbar("Error", "Failed to add note");
-      print("Error adding note: $e");
-    }
-  }
-
-  /// Delete a note from Firestore on id base
-  void deleteNote(String id) async {
-    try {
-      await FirebaseFirestore.instance.collection('notes').doc(id).delete();
-
-      // Remove the note from the local list
-      notes.removeWhere((note) => note.id == id);
-    } catch (e) {
-      Get.snackbar("Error", "Failed to delete note");
-      print("Error deleting note: $e");
-    }
-  }
-
-  /// Update an existing note
-  void updateNote(String id) async {
-    try {
-      if (updateTitle.text.isEmpty) {
-        Get.snackbar("Error", "Title cannot be empty");
-        return;
-      }
-
-      final updatedNote = NoteModel(
-        id: id,
-        title: updateTitle.text,
-        subtitle: updateSubtitle.text,
-        createdAt: DateTime.now().toString(),
-      );
-
-      await FirebaseFirestore.instance
-          .collection('notes')
-          .doc(id)
-          .update(updatedNote.toJson());
-
-      // Update the local list
-      final index = notes.indexWhere((note) => note.id == id);
-      if (index != -1) {
-        notes[index] = updatedNote;
-      }
-
-      // Clear fields and close the dialog
-      updateTitle.clear();
-      updateSubtitle.clear();
-      Get.back();
-    } catch (e) {
-      Get.snackbar("Error", "Failed to update note");
-      print("Error updating note: $e");
-    }
-  }
-
-  void onTapLogout() {
-    Get.defaultDialog(
-      title: "Logout",
-      content: const Text("Are you sure you want to logout?"),
-      onConfirm: () async {
-        Get.back();
-        await FirebaseServices.signOut();
-        Get.offNamed(AppRoutes.login);
-      },
-      onCancel: () {
-        Get.back(); // Close the dialog
-      },
-    );
-  }
-
-  void onTapAddButton() {
-    AddNoteBottomsheet().showSheet(
-        onTapAdd: () async {
-          await onTapAddNote();
-        },
-        titleController: titleController,
-        subtitleController: subtitleController);
-  }
 }

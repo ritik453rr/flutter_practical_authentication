@@ -1,0 +1,2 @@
+D:/ptcl_flutter/firebase_ptcl/android/app/.cxx/Debug/6h1919z5/x86_64/CMakeFiles/edit_cache.dir
+D:/ptcl_flutter/firebase_ptcl/android/app/.cxx/Debug/6h1919z5/x86_64/CMakeFiles/rebuild_cache.dir
