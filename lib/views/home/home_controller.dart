@@ -2,6 +2,7 @@ import 'package:authentication_ptcl/bottomsheet/add_bottomsheet.dart';
 import 'package:authentication_ptcl/dialog/adaptive_dialog.dart';
 import 'package:authentication_ptcl/navigation/app_routes.dart';
 import 'package:authentication_ptcl/services/firebase_services.dart';
+import 'package:authentication_ptcl/services/firestore_services.dart';
 import 'package:authentication_ptcl/views/home/model/note_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -12,18 +13,15 @@ class HomeController extends GetxController {
   final subtitleController = TextEditingController();
   var scrollController = ScrollController();
 
-  var isLoading = true.obs;
+  var fireStoreService = FirestoreServices();
   var isFetchingMore = false.obs;
-  DocumentSnapshot? lastDocument;
-  final FirebaseFirestore fireStore = FirebaseFirestore.instance;
-
-  // Observable list of notes
+  var isLoading = true.obs;
   final notes = <NoteModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchUsersWithPagination();
+    fetchInitialData();
     addListenersToScrollController();
   }
 
@@ -34,45 +32,25 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  /// Fetch users from Firestore with pagination
-  Future<void> fetchUsersWithPagination({bool isNextPage = false}) async {
-    try {
-      if (isNextPage) {
-        isFetchingMore.value = true;
-      }
-      Query query = fireStore
-          .collection('notes')
-          .orderBy('createdAt', descending: true)
-          .limit(5);
-
-      if (isNextPage && lastDocument != null) {
-        query = query.startAfterDocument(lastDocument!);
-      }
-
-      QuerySnapshot querySnapshot = await query.get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        lastDocument = querySnapshot.docs.last;
-        final newUsers = querySnapshot.docs
-            .map(
-              (doc) => NoteModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                doc.id,
-              ),
-            )
-            .toList();
-
-        isNextPage ? notes.addAll(newUsers) : notes.assignAll(newUsers);
-      }
-    } catch (e) {
-      debugPrint("Error fetching users: $e");
-    } finally {
-      if (isNextPage) {
-        isFetchingMore(false);
-      } else {
-        isLoading(false);
-      }
+  /// Fetch initial data from Firestore
+  Future<void> fetchInitialData() async {
+    final value = await fireStoreService.fetchInitialData(size: 5);
+    if (value != null) {
+      notes.assignAll(value);
+      isLoading(false);
+    } else {
+      isLoading(false);
     }
+  }
+
+  /// Fetch more data from Firestore for pagination
+  Future<void> fetchMoreData() async {
+    isFetchingMore.value = true;
+    final value = await fireStoreService.fetchMoreData();
+    if (value != null) {
+      notes.addAll(value);
+    }
+    isFetchingMore.value = false;
   }
 
   /// Add listeners to the scroll controller and page controller
@@ -81,7 +59,7 @@ class HomeController extends GetxController {
       if (scrollController.position.pixels ==
               scrollController.position.maxScrollExtent &&
           !isFetchingMore.value) {
-        fetchUsersWithPagination(isNextPage: true);
+        fetchMoreData();
       }
     });
   }
@@ -155,7 +133,6 @@ class HomeController extends GetxController {
   void updateNote({required NoteModel note}) {
     titleController.text = note.title;
     subtitleController.text = note.subtitle;
-    // show
     AddNoteBottomsheet()
         .showSheet(
             titleController: titleController,
@@ -163,13 +140,11 @@ class HomeController extends GetxController {
             isUpdation: true,
             onTapButton: () async {
               try {
-                // Validate that the title is not empty
                 if (titleController.text.isEmpty) {
                   Get.snackbar("Error", "Title cannot be empty");
                   return;
                 }
                 Get.back();
-                // Create an updated note object
                 final updatedNote = NoteModel(
                   id: note.id,
                   title: titleController.text,
@@ -212,24 +187,4 @@ class HomeController extends GetxController {
       },
     );
   }
-
-  //Fetch All notes at once from Firestore (with real-time updates)
-  // void fetchAllNotes() {
-  //   FirebaseFirestore.instance
-  //       .collection('notes')
-  //       .orderBy('createdAt', descending: true) // Newest first
-  //       .snapshots()
-  //       .listen(
-  //     (snapshot) {
-  //       // Efficient batch update using assignAll
-  //       notes.assignAll(
-  //         snapshot.docs.map((doc) => NoteModel.fromJson(doc.data(), doc.id)),
-  //       );
-  //     },
-  //     onError: (e) {
-  //       Get.snackbar("Error", "Failed to fetch notes");
-  //       debugPrint("Error fetching notes: $e");
-  //     },
-  //   );
-  // }
 }

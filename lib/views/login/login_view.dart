@@ -10,16 +10,31 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            await FirebaseServices.signInWithGoogle();
-            if (AppSrorage.getvalue(AppSrorage.isLogin) ?? false) {
-              Get.offNamed(AppRoutes.home);
-            }
-          },
-          child: const Text(
-            "Sign in with Google",
+      body: Obx(
+        () => Center(
+          child: SizedBox(
+            height: 40,
+            width: 200,
+            child: ElevatedButton(
+              onPressed: () async {
+                await FirebaseServices.signInWithGoogle();
+                if (AppSrorage.getLoginStatus()) {
+                  Get.offNamed(AppRoutes.dashboard);
+                }
+              },
+              child: FirebaseServices.isLoading.value
+                  ? const SizedBox(
+                      height: 28,
+                      width: 28,
+                      child:CircularProgressIndicator(
+                        color: Colors.blue,
+                        strokeWidth: 3,
+                      ),
+                    )
+                  : const Text(
+                      "Sign in with Google",
+                    ),
+            ),
           ),
         ),
       ),

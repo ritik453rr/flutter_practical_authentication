@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await GetStorage.init();
@@ -21,8 +21,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: 
-      AppSrorage.getvalue(AppSrorage.isLogin) == true ? AppRoutes.home : AppRoutes.login,
+      initialRoute:
+          AppSrorage.getLoginStatus() ? AppRoutes.dashboard : AppRoutes.login,
       getPages: AppPages.pages,
     );
   }
