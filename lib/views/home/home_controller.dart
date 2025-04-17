@@ -34,7 +34,7 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  /// Fetch initial data from Firestore
+  /// Fetch initial data from Firestore home change
   Future<void> fetchInitialData() async {
     final value = await fireStoreService.fetchHomeData(size: pageSize);
     if (value != null) {
