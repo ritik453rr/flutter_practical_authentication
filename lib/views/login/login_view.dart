@@ -1,5 +1,4 @@
-import 'package:authentication_ptcl/comman/app_srorage.dart';
-import 'package:authentication_ptcl/navigation/app_routes.dart';
+
 import 'package:authentication_ptcl/services/firebase_services.dart';
 import 'package:authentication_ptcl/views/login/login_controller.dart';
 import 'package:flutter/material.dart';
@@ -17,16 +16,13 @@ class LoginView extends GetView<LoginController> {
             width: 200,
             child: ElevatedButton(
               onPressed: () async {
-                await FirebaseServices.signInWithGoogle();
-                if (AppSrorage.getLoginStatus()) {
-                  Get.offNamed(AppRoutes.dashboard);
-                }
+                controller.onTapSignIn();
               },
               child: FirebaseServices.isLoading.value
                   ? const SizedBox(
                       height: 28,
                       width: 28,
-                      child:CircularProgressIndicator(
+                      child: CircularProgressIndicator(
                         color: Colors.blue,
                         strokeWidth: 3,
                       ),

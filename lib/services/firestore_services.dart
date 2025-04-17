@@ -1,14 +1,33 @@
+import 'package:authentication_ptcl/comman/app_srorage.dart';
 import 'package:authentication_ptcl/views/home/model/note_model.dart';
+import 'package:authentication_ptcl/views/home/model/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class FirestoreServices {
-   DocumentSnapshot? lastDocument;
-   final FirebaseFirestore fireStore = FirebaseFirestore.instance;
-   bool hasMore = false;
+  DocumentSnapshot? lastDocument;
+  final FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  bool hasMore = false;
+
+ /// Method to add new user to firestore
+  void addUserToFirestore() async {
+    final user = AppSrorage.getUser();
+    final newUser = UserModel(
+      uid: user['uid'] ?? "",
+      userName: user['name'] ?? "",
+      email:  user['email'] ?? "",
+      profilePicture: user['photoUrl'] ?? "",
+    );
+
+    // Add the new note to Firestore
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user['uid'])
+        .set(newUser.toJson());
+  }
 
   /// Fetch initial data from Firestore
-   Future<List<NoteModel>?> fetchInitialData({int size = 5}) async {
+  Future<List<NoteModel>?> fetchHomeData({int size = 5}) async {
     try {
       Query query = fireStore
           .collection('notes')
@@ -16,7 +35,7 @@ class FirestoreServices {
           .limit(size);
 
       QuerySnapshot querySnapshot = await query.get();
-      hasMore = querySnapshot.docs.length == 5;
+      hasMore = querySnapshot.docs.length == size;
 
       if (querySnapshot.docs.isNotEmpty) {
         lastDocument = querySnapshot.docs.last;
@@ -37,17 +56,18 @@ class FirestoreServices {
     }
   }
 
-   Future<List<NoteModel>?> fetchMoreData() async {
+/// Fetch more data from Firestore in pagination
+  Future<List<NoteModel>?> fetchMoreHomeData({int size=5}) async {
     try {
       if (!hasMore || lastDocument == null) return null;
       Query query = fireStore
           .collection('notes')
           .orderBy('createdAt', descending: true)
-          .limit(5)
+          .limit(size)
           .startAfterDocument(lastDocument!);
 
       QuerySnapshot querySnapshot = await query.get();
-      hasMore = querySnapshot.docs.length == 5;
+      hasMore = querySnapshot.docs.length == size;
       if (querySnapshot.docs.isNotEmpty) {
         lastDocument = querySnapshot.docs.last;
         final newNotes = querySnapshot.docs
@@ -64,10 +84,10 @@ class FirestoreServices {
     } catch (e) {
       debugPrint("Error fetching more data: $e");
       return null;
-    } 
+    }
   }
 
-    /// Fetch requests for the current user
+  /// Fetch requests for the current user
   // static Future<List<RequestModel>?> loadRequests() async {
   //   try {
   //     final querySnapshot =
@@ -120,5 +140,4 @@ class FirestoreServices {
   //     return false;
   //   }
   // }
-
 }

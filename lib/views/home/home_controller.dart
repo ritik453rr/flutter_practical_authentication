@@ -12,10 +12,12 @@ class HomeController extends GetxController {
   final titleController = TextEditingController();
   final subtitleController = TextEditingController();
   var scrollController = ScrollController();
-
   var fireStoreService = FirestoreServices();
+
   var isFetchingMore = false.obs;
   var isLoading = true.obs;
+  var pageSize = 5;
+  
   final notes = <NoteModel>[].obs;
 
   @override
@@ -34,7 +36,7 @@ class HomeController extends GetxController {
 
   /// Fetch initial data from Firestore
   Future<void> fetchInitialData() async {
-    final value = await fireStoreService.fetchInitialData(size: 5);
+    final value = await fireStoreService.fetchHomeData(size: pageSize);
     if (value != null) {
       notes.assignAll(value);
       isLoading(false);
@@ -45,8 +47,10 @@ class HomeController extends GetxController {
 
   /// Fetch more data from Firestore for pagination
   Future<void> fetchMoreData() async {
+    if (isFetchingMore.value) return;
+    print("Called");
     isFetchingMore.value = true;
-    final value = await fireStoreService.fetchMoreData();
+    final value = await fireStoreService.fetchMoreHomeData(size: pageSize);
     if (value != null) {
       notes.addAll(value);
     }
@@ -56,10 +60,12 @@ class HomeController extends GetxController {
   /// Add listeners to the scroll controller and page controller
   void addListenersToScrollController() {
     scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-              scrollController.position.maxScrollExtent &&
-          !isFetchingMore.value) {
-        fetchMoreData();
+      //check first hasmore or not
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 150 &&fireStoreService.hasMore) {
+        
+          fetchMoreData();
+        
       }
     });
   }
@@ -78,7 +84,8 @@ class HomeController extends GetxController {
                   );
                   return;
                 }
-                Get.back(); // Close the bottom sheet
+                Get.back();
+                // Close the bottom sheet
                 final newNote = NoteModel(
                   id: DateTime.now().toString(), // Generate a unique ID
                   title: titleController.text,

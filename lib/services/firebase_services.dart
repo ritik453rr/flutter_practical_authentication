@@ -34,11 +34,14 @@ class FirebaseServices {
 
       // Update user state
       user = userCredential.user;
-
-      AppSrorage.setLoginStatus(true);
-      AppSrorage.setUid(user!.uid);
+      AppSrorage.setUserData(data: {
+        "name": user?.displayName ?? "",
+        "email": user?.email ?? "",
+        "uid": user?.uid ?? "",
+        "photoUrl": user?.photoURL ?? "",
+      });
       isLoading.value = false;
-
+      AppSrorage.setLoginStatus(true);
       debugPrint("Signed in as ${user?.displayName ?? ""}");
     } catch (e) {
       isLoading.value = false;
@@ -57,7 +60,6 @@ class FirebaseServices {
   static Future<void> signOut() async {
     await _auth.signOut();
     await _googleSignIn.signOut();
-    AppSrorage.setLoginStatus(false);
-    user = null;
+    AppSrorage.clear();
   }
 }

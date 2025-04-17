@@ -48,7 +48,7 @@ class DashboardView extends GetView<DashboardController> {
           index: controller.currentIndex.value,
           children: const [
             HomeView(),
-            ChatView(),
+            MessageView(),
             Center(child: Text("Profile")),
           ],
         ),

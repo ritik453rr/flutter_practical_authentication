@@ -19,72 +19,66 @@ class HomeView extends GetView<HomeController> {
           onPressed: controller.addNote,
           child: const Icon(Icons.add),
         ),
-        body: Obx(
-          () {
-            if (controller.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (controller.notes.isEmpty) {
-              return const Center(
-                child: Text(
-                  "No Notes Found",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
-            }
-            return Container(
-              height: 80,
-              margin: const EdgeInsets.only(top: 20),
-              child: Stack(
-                children: [
-                  ListView.builder(
-                    controller: controller.scrollController,
-                    itemCount: controller.notes.length,
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    itemBuilder: (context, index) {
-                      final note = controller.notes[index];
-                      return listItem(
-                        title: note.title,
-                        onTap: () {
-                          controller.updateNote(note: note);
-                        },
-                        onLongPress: () {
-                          controller.deleteNote(noteId: note.id);
-                        },
-                      );
-                    },
-                  ),
-
-                  // Loading indicator at the end
-                  if (controller.isFetchingMore.value)
-                    Positioned(
-                      right: 20,
-                      child: Container(
-                        height: 80,
-                        width: 90,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.red),
-                          ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 30,
+              ),
+              Obx(
+                () {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (controller.notes.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "No Notes Found",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                    );
+                  }
+                  return SizedBox(
+                    height: 80,
+                    child: ListView.builder(
+                      controller: controller.scrollController,
+                      itemCount: controller.notes.length +
+                          (controller.isFetchingMore.value ? 1 : 0),
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        right: 10,
+                      ),
+                      itemBuilder: (context, index) {
+                        // Show loading indicator at the end
+                        if (index >= controller.notes.length) {
+                          return Container(
+                            width: 70, // Match your listItem width
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.only(right: 10),
+                            child: const CircularProgressIndicator(),
+                          );
+                        }
+
+                        // Existing note item
+                        final note = controller.notes[index];
+                        return circleItem(
+                          title: note.title,
+                          onTap: () => controller.updateNote(note: note),
+                          onLongPress: () =>
+                              controller.deleteNote(noteId: note.id),
+                        );
+                      },
                     ),
-                ],
+                  );
+                },
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );
@@ -92,7 +86,7 @@ class HomeView extends GetView<HomeController> {
 }
 
 //// Widget to display each note in the list
-Widget listItem({
+Widget circleItem({
   required String title,
   void Function()? onLongPress,
   void Function()? onTap,
@@ -103,7 +97,9 @@ Widget listItem({
     child: Container(
       height: 70,
       width: 70,
-      margin: const EdgeInsets.only(right: 10),
+      margin: const EdgeInsets.only(
+        right: 10,
+      ),
       decoration: const BoxDecoration(
         color: Colors.green,
         shape: BoxShape.circle,
