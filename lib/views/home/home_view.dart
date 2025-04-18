@@ -19,66 +19,136 @@ class HomeView extends GetView<HomeController> {
           onPressed: controller.addNote,
           child: const Icon(Icons.add),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 30,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(
+                left: 20,
               ),
-              Obx(
-                () {
-                  if (controller.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (controller.notes.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        "No Notes Found",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    );
-                  }
-                  return SizedBox(
-                    height: 80,
-                    child: ListView.builder(
-                      controller: controller.scrollController,
+              child: Text(
+                "Notes List horizontal pagination",
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            Obx(
+              () {
+                return controller.isLoading.value
+                    ? const Expanded(
+                        child: Center(child: CircularProgressIndicator()))
+                    : controller.notes.isEmpty
+                        ? const Expanded(
+                            child: Center(
+                              child: Text(
+                                "No Notes Found",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox(
+                            height: 80,
+                            child: ListView.builder(
+                              controller: controller.scrollController,
+                              itemCount: controller.notes.length +
+                                  (controller.isFetchingMore.value ? 1 : 0),
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.only(
+                                left: 20,
+                                right: 10,
+                              ),
+                              itemBuilder: (context, index) {
+                                // Show loading indicator at the end
+                                if (index >= controller.notes.length) {
+                                  return Container(
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.green,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  );
+                                }
+
+                                // Existing note item
+                                final note = controller.notes[index];
+                                return circleItem(
+                                  title: note.title,
+                                  onTap: () =>
+                                      controller.updateNote(note: note),
+                                  onLongPress: () =>
+                                      controller.deleteNote(noteId: note.id),
+                                );
+                              },
+                            ),
+                          );
+              },
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+              ),
+              child: Text(
+                "Notes pages horizontal pagination",
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            Obx(() => Container(
+                  height: Get.height * 0.52,
+                  child: PageView.builder(
+                      controller: controller.pageController,
                       itemCount: controller.notes.length +
                           (controller.isFetchingMore.value ? 1 : 0),
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 10,
-                      ),
                       itemBuilder: (context, index) {
                         // Show loading indicator at the end
                         if (index >= controller.notes.length) {
                           return Container(
-                            width: 70, // Match your listItem width
                             alignment: Alignment.center,
-                            padding: const EdgeInsets.only(right: 10),
-                            child: const CircularProgressIndicator(),
+                            margin: const EdgeInsets.only(right: 20, left: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
                           );
                         }
-
-                        // Existing note item
-                        final note = controller.notes[index];
-                        return circleItem(
-                          title: note.title,
-                          onTap: () => controller.updateNote(note: note),
-                          onLongPress: () =>
-                              controller.deleteNote(noteId: note.id),
+                        return Container(
+                          // height: 100,
+                          width: Get.width,
+                          margin: const EdgeInsets.only(
+                            right: 20,
+                            left: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Text(
+                              controller.notes[index].title.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+                      }),
+                )),
+          ],
         ),
       ),
     );

@@ -1,5 +1,3 @@
-import 'package:authentication_ptcl/views/home/model/user_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_storage/get_storage.dart';
 
 class AppSrorage {
@@ -7,7 +5,7 @@ class AppSrorage {
   static const String isLogin = "isLogin";
   static const String user = 'user';
 
-  static setLoginStatus(bool value) {
+  void setLoginStatus(bool value) {
     getStorage.write(isLogin, value);
   }
 

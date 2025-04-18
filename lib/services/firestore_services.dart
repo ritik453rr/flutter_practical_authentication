@@ -9,13 +9,13 @@ class FirestoreServices {
   final FirebaseFirestore fireStore = FirebaseFirestore.instance;
   bool hasMore = false;
 
- /// Method to add new user to firestore
-  void addUserToFirestore() async {
+  /// Method to add new user to firestore
+  Future<void> addUserToFirestore() async {
     final user = AppSrorage.getUser();
     final newUser = UserModel(
       uid: user['uid'] ?? "",
       userName: user['name'] ?? "",
-      email:  user['email'] ?? "",
+      email: user['email'] ?? "",
       profilePicture: user['photoUrl'] ?? "",
     );
 
@@ -26,7 +26,7 @@ class FirestoreServices {
         .set(newUser.toJson());
   }
 
-  /// Fetch initial data from Firestore
+  /// Fetch initial data from Firestore jh
   Future<List<NoteModel>?> fetchHomeData({int size = 5}) async {
     try {
       Query query = fireStore
@@ -56,8 +56,8 @@ class FirestoreServices {
     }
   }
 
-/// Fetch more data from Firestore in pagination
-  Future<List<NoteModel>?> fetchMoreHomeData({int size=5}) async {
+  /// Fetch more data from Firestore in pagination
+  Future<List<NoteModel>?> fetchMoreHomeData({int size = 5}) async {
     try {
       if (!hasMore || lastDocument == null) return null;
       Query query = fireStore

@@ -9,29 +9,47 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
-  final titleController = TextEditingController();
-  final subtitleController = TextEditingController();
-  var scrollController = ScrollController();
-  var fireStoreService = FirestoreServices();
+  late TextEditingController titleController;
+  late TextEditingController subtitleController;
+  late ScrollController scrollController;
+  late FirestoreServices fireStoreService;
+  late PageController? pageController;
 
   var isFetchingMore = false.obs;
   var isLoading = true.obs;
   var pageSize = 5;
-  
+
   final notes = <NoteModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchInitialData();
+    initialize();
     addListenersToScrollController();
+    addListenersToPageController();
+    fetchInitialData();
   }
 
   @override
   void onClose() {
+    super.onClose();
+    destroy();
+  }
+
+  void initialize() {
+    titleController = TextEditingController();
+    subtitleController = TextEditingController();
+    scrollController = ScrollController();
+    fireStoreService = FirestoreServices();
+    pageController = PageController(initialPage: 0, keepPage: true);  
+  }
+
+  void destroy() {
     titleController.dispose();
     subtitleController.dispose();
-    super.onClose();
+    scrollController.dispose();
+    pageController?.dispose();
+
   }
 
   /// Fetch initial data from Firestore home change
@@ -45,29 +63,39 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Fetch more data from Firestore for pagination
-  Future<void> fetchMoreData() async {
-    if (isFetchingMore.value) return;
-    print("Called");
-    isFetchingMore.value = true;
-    final value = await fireStoreService.fetchMoreHomeData(size: pageSize);
-    if (value != null) {
-      notes.addAll(value);
-    }
-    isFetchingMore.value = false;
-  }
-
   /// Add listeners to the scroll controller and page controller
   void addListenersToScrollController() {
     scrollController.addListener(() {
       //check first hasmore or not
       if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 150 &&fireStoreService.hasMore) {
-        
-          fetchMoreData();
-        
+              scrollController.position.maxScrollExtent - 150 &&
+          fireStoreService.hasMore) {
+        fetchMoreData();
       }
     });
+  }
+
+   void addListenersToPageController() {
+    pageController!.addListener(() {
+      //check first hasmore or not
+      if (pageController!.position.pixels >=
+              pageController!.position.maxScrollExtent - 150 &&
+          fireStoreService.hasMore) {
+        fetchMoreData();
+      }
+    });
+  }
+
+  /// Fetch more data from Firestore for pagination
+  Future<void> fetchMoreData() async {
+    if (isFetchingMore.value) return; // Prevent multiple fetches
+    isFetchingMore.value = true;
+    await Future.delayed(const Duration(seconds: 60));
+    final value = await fireStoreService.fetchMoreHomeData(size: pageSize);
+    if (value != null) {
+      notes.addAll(value);
+    }
+    isFetchingMore.value = false;
   }
 
   /// Show the bottom sheet for adding a new note
@@ -189,7 +217,7 @@ class HomeController extends GetxController {
       content: "Are you sure you want to logout?",
       onPressedYes: () async {
         Get.back(); // Close the dialog
-        await FirebaseServices.signOut();
+        await FirebaseServices().signOut();
         Get.offNamed(AppRoutes.login);
       },
     );
