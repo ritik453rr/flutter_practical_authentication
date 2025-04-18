@@ -1,4 +1,3 @@
-
 import 'package:authentication_ptcl/services/firebase_services.dart';
 import 'package:authentication_ptcl/views/login/login_controller.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,7 @@ class LoginView extends GetView<LoginController> {
               onPressed: () async {
                 controller.onTapSignIn();
               },
-              child: FirebaseServices.isLoading.value
+              child: FirebaseServices.isSigning.value
                   ? const SizedBox(
                       height: 28,
                       width: 28,
