@@ -1,14 +1,14 @@
 import 'package:authentication_ptcl/navigation/app_routes.dart';
-import 'package:authentication_ptcl/views/dashboard/dashboard_binding.dart';
-import 'package:authentication_ptcl/views/dashboard/dashboard_view.dart';
-import 'package:authentication_ptcl/views/home/home_binding.dart';
-import 'package:authentication_ptcl/views/home/home_view.dart';
-import 'package:authentication_ptcl/views/login/login_binding.dart';
-import 'package:authentication_ptcl/views/login/login_view.dart';
-import 'package:authentication_ptcl/views/message/chat/chat_binding.dart';
-import 'package:authentication_ptcl/views/message/chat/chat_view.dart';
-import 'package:authentication_ptcl/views/message/message_binding.dart';
-import 'package:authentication_ptcl/views/message/message_view.dart';
+import 'package:authentication_ptcl/pages/dashboard/dashboard_binding.dart';
+import 'package:authentication_ptcl/pages/dashboard/dashboard_view.dart';
+import 'package:authentication_ptcl/pages/home/home_binding.dart';
+import 'package:authentication_ptcl/pages/home/home_view.dart';
+import 'package:authentication_ptcl/pages/login/login_binding.dart';
+import 'package:authentication_ptcl/pages/login/login_view.dart';
+import 'package:authentication_ptcl/pages/message/chat/chat_binding.dart';
+import 'package:authentication_ptcl/pages/message/chat/chat_view.dart';
+import 'package:authentication_ptcl/pages/message/message_binding.dart';
+import 'package:authentication_ptcl/pages/message/message_view.dart';
 import 'package:get/get.dart';
 class AppPages {
   static final pages = [

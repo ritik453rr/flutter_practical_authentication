@@ -21,7 +21,7 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(right: 20),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.green,
             ),
             onPressed: onTapTrailingIcon,
             child: const Text(

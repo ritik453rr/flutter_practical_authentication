@@ -1,6 +1,6 @@
 import 'package:authentication_ptcl/comman/app_srorage.dart';
-import 'package:authentication_ptcl/views/home/model/note_model.dart';
-import 'package:authentication_ptcl/views/home/model/user_model.dart';
+import 'package:authentication_ptcl/pages/home/model/note_model.dart';
+import 'package:authentication_ptcl/pages/home/model/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
