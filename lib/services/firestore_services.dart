@@ -26,66 +26,7 @@ class FirestoreServices {
         .set(newUser.toJson());
   }
 
-  /// Fetch initial data from Firestore jh
-  Future<List<NoteModel>?> fetchHomeData({int size = 5}) async {
-    try {
-      Query query = fireStore
-          .collection('notes')
-          .orderBy('createdAt', descending: true)
-          .limit(size);
-
-      QuerySnapshot querySnapshot = await query.get();
-      hasMore = querySnapshot.docs.length == size;
-
-      if (querySnapshot.docs.isNotEmpty) {
-        lastDocument = querySnapshot.docs.last;
-        final initialNotes = querySnapshot.docs
-            .map(
-              (doc) => NoteModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                doc.id,
-              ),
-            )
-            .toList();
-        return initialNotes;
-      }
-      return null;
-    } catch (e) {
-      debugPrint("Error fetching initial data: $e");
-      return null;
-    }
-  }
-
-  /// Fetch more data from Firestore in pagination
-  Future<List<NoteModel>?> fetchMoreHomeData({int size = 5}) async {
-    try {
-      if (!hasMore || lastDocument == null) return null;
-      Query query = fireStore
-          .collection('notes')
-          .orderBy('createdAt', descending: true)
-          .limit(size)
-          .startAfterDocument(lastDocument!);
-
-      QuerySnapshot querySnapshot = await query.get();
-      hasMore = querySnapshot.docs.length == size;
-      if (querySnapshot.docs.isNotEmpty) {
-        lastDocument = querySnapshot.docs.last;
-        final newNotes = querySnapshot.docs
-            .map(
-              (doc) => NoteModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                doc.id,
-              ),
-            )
-            .toList();
-        return newNotes;
-      }
-      return null;
-    } catch (e) {
-      debugPrint("Error fetching more data: $e");
-      return null;
-    }
-  }
+  
 
   /// Fetch requests for the current user
   // static Future<List<RequestModel>?> loadRequests() async {
