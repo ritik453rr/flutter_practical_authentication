@@ -1,7 +1,7 @@
 import 'package:authentication_ptcl/pages/dashboard/dashboard_controller.dart';
-import 'package:authentication_ptcl/pages/home/home_view.dart';
-import 'package:authentication_ptcl/pages/message/chat/chat_view.dart';
-import 'package:authentication_ptcl/pages/message/message_view.dart';
+import 'package:authentication_ptcl/pages/dashboard/home/home_view.dart';
+import 'package:authentication_ptcl/pages/dashboard/message/message_view.dart';
+import 'package:authentication_ptcl/pages/dashboard/profile/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -25,34 +25,27 @@ class DashboardView extends GetView<DashboardController> {
             child: BottomNavigationBar(
               currentIndex: controller.currentIndex.value,
               backgroundColor: Colors.white,
+              selectedItemColor: Colors.green,
               onTap: controller.changePage,
               selectedLabelStyle: const TextStyle(fontSize: 5),
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.chat),
-                  label: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: '',
-                ),
+              items: [
+                bottomNavBar(icon: Icons.home),
+                bottomNavBar(icon: Icons.message),
+                bottomNavBar(icon: Icons.person),
               ],
             ),
           )),
       body: Obx(
         () => IndexedStack(
           index: controller.currentIndex.value,
-          children: const [
-            HomeView(),
-            MessageView(),
-            Center(child: Text("Profile")),
-          ],
+          children: [HomeView(), MessageView(), ProfileView()],
         ),
       ),
     );
   }
+}
+
+/// method to create a bottom navigation bar item
+BottomNavigationBarItem bottomNavBar({required IconData icon}) {
+  return BottomNavigationBarItem(icon: Icon(icon), label: '');
 }

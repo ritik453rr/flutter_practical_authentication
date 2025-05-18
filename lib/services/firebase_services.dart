@@ -1,5 +1,7 @@
 import 'package:authentication_ptcl/comman/app_srorage.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,14 +9,26 @@ import 'package:google_sign_in/google_sign_in.dart';
 /// Firebase Services class to handle authentication and user state
 class FirebaseServices {
   User? user;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-   static var isSigning = false.obs;
+  static final FirebaseAuth auth = FirebaseAuth.instance;
+  static final GoogleSignIn googleSignIn = GoogleSignIn();
+  static final firebaseAnalytics = FirebaseAnalytics.instance;
+  static var isSigning = false.obs;
+
+  /// init firebase method
+  static Future<void> initFirebase() async {
+    try {
+      await Firebase.initializeApp();
+      firebaseAnalytics.setAnalyticsCollectionEnabled(true);
+      FirebaseAnalyticsObserver(analytics: firebaseAnalytics);
+    } catch (e) {
+      debugPrint("Error initializing Firebase: $e");
+    }
+  }
 
   /// Google Sign-In method
-   Future<bool> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) return false; // User canceled the sign-in
       isSigning.value = true;
       // Obtain the authentication details from the request
@@ -28,7 +42,7 @@ class FirebaseServices {
 
       // Sign in to Firebase with the Google credential
       UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+          await auth.signInWithCredential(credential);
 
       // Update user state
       user = userCredential.user;
@@ -38,7 +52,7 @@ class FirebaseServices {
         "uid": user?.uid ?? "",
         "photoUrl": user?.photoURL ?? "",
       });
-      
+
       debugPrint("Signed in as ${user?.displayName ?? ""}");
       return true;
     } catch (e) {
@@ -49,9 +63,9 @@ class FirebaseServices {
   }
 
   // Sign-out method
-   Future<void> signOut() async {
-    await _auth.signOut();
-    await _googleSignIn.signOut();
+  static Future<void> signOut() async {
+    await auth.signOut();
+    await googleSignIn.signOut();
     AppSrorage.clear();
   }
 }

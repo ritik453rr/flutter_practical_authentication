@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
   final Color color;
-  final void Function()? onTapTrailingIcon;
-
+  final String title;
   const CustomAppbar({
     super.key,
     this.color = Colors.white,
-    this.onTapTrailingIcon,
+    this.title = "",
   });
 
   @override
@@ -15,24 +14,8 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: color,
       surfaceTintColor: color,
-      title: const Text("Home"),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-            ),
-            onPressed: onTapTrailingIcon,
-            child: const Text(
-              "Logout",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
+      title: title.isEmpty?null: Text(title),
+      actions: [],
     );
   }
 

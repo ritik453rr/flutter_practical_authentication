@@ -1,12 +1,10 @@
 import 'package:authentication_ptcl/comman/app_srorage.dart';
-import 'package:authentication_ptcl/pages/home/model/note_model.dart';
-import 'package:authentication_ptcl/pages/home/model/user_model.dart';
+import 'package:authentication_ptcl/pages/dashboard/home/model/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 class FirestoreServices {
   DocumentSnapshot? lastDocument;
-  final FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  final fireStore = FirebaseFirestore.instance;
   bool hasMore = false;
 
   /// Method to add new user to firestore
