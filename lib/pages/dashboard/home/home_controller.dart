@@ -2,7 +2,7 @@ import 'package:authentication_ptcl/bottomsheet/add_bottomsheet.dart';
 import 'package:authentication_ptcl/dialog/adaptive_dialog.dart';
 import 'package:authentication_ptcl/navigation/app_routes.dart';
 import 'package:authentication_ptcl/services/firebase_services.dart';
-import 'package:authentication_ptcl/pages/dashboard/home/model/note_model.dart';
+import 'package:authentication_ptcl/model/note_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

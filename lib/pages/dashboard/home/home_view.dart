@@ -2,12 +2,18 @@ import 'package:authentication_ptcl/comman/common_ui.dart';
 import 'package:authentication_ptcl/comman/custom_appbart.dart';
 import 'package:authentication_ptcl/comman/global.dart';
 import 'package:authentication_ptcl/pages/dashboard/home/home_controller.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({super.key});
-
+  HomeView({super.key});
+  final refreshController = RefreshController();
+  final easyRefreshController = EasyRefreshController(
+    controlFinishRefresh: true,
+    controlFinishLoad: true,
+  );
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -40,12 +46,12 @@ class HomeView extends GetView<HomeController> {
                           color: Colors.black,
                         ),
                       )
-                    : RefreshIndicator(
-                        color: Colors.green,
-                        backgroundColor: Colors.white,
+                    : SmartRefresher(
+                        controller: refreshController,
                         onRefresh: () async {
                           await Future.delayed(const Duration(seconds: 1));
                           await controller.fetchInitialData();
+                          refreshController.refreshCompleted();
                         },
                         child: SingleChildScrollView(
                           controller: controller.bodyScrollController,

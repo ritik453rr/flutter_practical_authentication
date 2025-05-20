@@ -1,5 +1,5 @@
 import 'package:authentication_ptcl/comman/app_srorage.dart';
-import 'package:authentication_ptcl/pages/dashboard/home/model/user_model.dart';
+import 'package:authentication_ptcl/model/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 

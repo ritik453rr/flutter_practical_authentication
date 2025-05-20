@@ -1,4 +1,6 @@
 import 'package:authentication_ptcl/comman/app_srorage.dart';
+import 'package:authentication_ptcl/model/user_model.dart';
+import 'package:authentication_ptcl/services/firestore_services.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,7 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 /// Firebase Services class to handle authentication and user state
 class FirebaseServices {
-  User? user;
+  static User? user;
   static final FirebaseAuth auth = FirebaseAuth.instance;
   static final GoogleSignIn googleSignIn = GoogleSignIn();
   static final firebaseAnalytics = FirebaseAnalytics.instance;
@@ -26,7 +28,7 @@ class FirebaseServices {
   }
 
   /// Google Sign-In method
-  Future<bool> signInWithGoogle() async {
+  static Future<bool> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) return false; // User canceled the sign-in
@@ -46,14 +48,14 @@ class FirebaseServices {
 
       // Update user state
       user = userCredential.user;
-      AppSrorage.setUserData(data: {
-        "name": user?.displayName ?? "",
-        "email": user?.email ?? "",
-        "uid": user?.uid ?? "",
-        "photoUrl": user?.photoURL ?? "",
-      });
-
-      debugPrint("Signed in as ${user?.displayName ?? ""}");
+      AppStorage.setUid(val: user?.uid ?? "");
+      await FirestoreServices.addUserToFirestore(
+          newUser: UserModel(
+        uid: user?.uid ?? "",
+        name: user?.displayName ?? "",
+        email: user?.email ?? "",
+        profileUrl: user?.photoURL ?? "",
+      ));
       return true;
     } catch (e) {
       isSigning.value = false;
@@ -66,6 +68,16 @@ class FirebaseServices {
   static Future<void> signOut() async {
     await auth.signOut();
     await googleSignIn.signOut();
-    AppSrorage.clear();
+    AppStorage.clear();
+  }
+
+  ///  Delete Account method
+  static Future<void> deleteAccount() async {
+    try {
+      await auth.currentUser?.delete();
+      await googleSignIn.signOut();
+    } catch (e) {
+      debugPrint("Error deleting account: $e");
+    }
   }
 }

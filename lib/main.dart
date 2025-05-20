@@ -22,8 +22,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute:
-          AppSrorage.getLoginStatus() ? AppRoutes.dashboard : AppRoutes.login,
+          AppStorage.getLoginStatus() ? AppRoutes.dashboard : AppRoutes.login,
       getPages: AppPages.pages,
+
       /// Firebase Analytics observer that tracks screen views
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),

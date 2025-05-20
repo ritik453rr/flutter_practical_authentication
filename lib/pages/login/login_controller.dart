@@ -7,11 +7,11 @@ import 'package:get/get.dart';
 
 class LoginController extends GetxController {
   void onTapSignIn() async {
-    if (await FirebaseServices().signInWithGoogle()) {
-      await FirestoreServices().addUserToFirestore();
+    if (await FirebaseServices.signInWithGoogle()) {
+      //await FirestoreServices.addUserToFirestore();
       FirebaseServices.isSigning.value = false;
-      AppSrorage().setLoginStatus(true);
       Get.offNamed(AppRoutes.dashboard);
+      AppStorage().setLoginStatus(true);
     } else {
       debugPrint("Error snackbar.....");
     }

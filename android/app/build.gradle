@@ -74,5 +74,6 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.9.0')
 }
 
+/// Add the Firebase Crashlytics SDK dependency
 apply plugin: 'com.google.firebase.crashlytics'
 
